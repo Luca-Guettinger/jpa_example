@@ -20,6 +20,4 @@ public class UserTestEntity implements Serializable {
 
     @Column(name = "age", nullable = false)
     private Integer age;
-
-    
 }
