@@ -4,35 +4,41 @@ import net.myplayplanet.jpatest.dtos.UserDto;
 import net.myplayplanet.jpatest.model.UserTestEntity;
 import net.myplayplanet.jpatest.repository.UserTestEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+
 
 @RestController
 public class UserController {
-    @PersistenceContext
-    EntityManager entityManager;
     private UserTestEntityRepository userTestEntityRepository;
+    private EntityManager entityManager;
 
     @Autowired
-    public UserController(UserTestEntityRepository userTestEntityRepository) {
+    public UserController(UserTestEntityRepository userTestEntityRepository, EntityManager entityManager) {
         this.userTestEntityRepository = userTestEntityRepository;
+        this.entityManager = entityManager;
     }
 
     @GetMapping("user/get/{id}")
     public UserDto getUser(@PathVariable String id) {
-        final UserTestEntity one = this.userTestEntityRepository.getOne(id);
-        System.out.println(one);
-        final UserDto userDto = new UserDto();
-        userDto.setUsername(one.getUsername());
-        return userDto;
+        var userTestEntity = this.userTestEntityRepository.findById(id).orElse(null);
+
+        if (userTestEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Benutzer mit der ID '" + id + "' nicht gefunden.");
+        }
+
+        return new UserDto(userTestEntity.getUsername());
     }
+
     @Transactional
     @PostMapping("user/set/")
     public void setUser(@RequestBody UserTestEntity user) {
-        System.out.println(user.getUsername());
-        this.entityManager.persist(user);
+        this.userTestEntityRepository.save(user);
+        //this.entityManager.persist(user);
     }
 }

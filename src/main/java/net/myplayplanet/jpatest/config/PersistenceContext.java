@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {
@@ -12,5 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 })
 @Transactional
 public class PersistenceContext {
+    @javax.persistence.PersistenceContext
+    EntityManager entityManager;
 
+    public EntityManager entityManager() {
+        return this.entityManager;
+    }
 }
